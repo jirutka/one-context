@@ -1,0 +1,115 @@
+#!/bin/sh
+# vim: set ts=4:
+set -eu
+
+readonly DEFAULT_MASK='255.255.255.0'
+
+# Prints value of the specified variable, or the given default if the variable
+# is empty or not defined.
+getval() {
+	local var_name="$1"
+	local default="${2:-}"
+
+	eval "echo \${$var_name:-$default}"
+}
+
+# Prints address (a.b.c.1) of the default gateway for the given IPv4 address.
+# This is used for ETH0 interface when ETH0_GATEWAY is not provided.
+gen_gateway_from_ipv4() {
+	local ip="$1"
+
+	echo "$(echo $ip | cut -d. -f1-3).1"
+}
+
+# Generates and prints IPv4 address from the given MAC address.
+gen_ip_from_mac() {
+	local mac="$1"
+
+	local ip=$(printf "$mac" | cut -d: -f3-6 | tr ':' '\n' \
+		| xargs -I# printf "%d." 0x#)
+
+	echo "${ip%?}"  # %? removes leading "."
+}
+
+# Prints name of the context managed interface for the given MAC address.
+# The name is in upper case and used as a prefix for variables that defines
+# this interface. Returns empty string if doesn't exist.
+context_dev_by_mac() {
+	local mac="$1"
+
+	env | sed -En "s/^(ETH[0-9]+)_MAC=$mac/\1/p"
+}
+
+# Generates and prints netifrc configuration variables for the specified
+# network interface.
+#
+# $1: Device name of the interface (e.g. eth0, eth1).
+# $2: Context name of the interface, i.e. variable prefix (e.g. ETH0, ETH1).
+gen_iface_conf() {
+	local dev="$1"
+	local prefix="$2"
+
+	local ip4="$(getval "$prefix"_IP)"
+	local ip6="$(getval "$prefix"_IPV6)"
+	local gw6="$(getval "$prefix"_GATEWAY6)"
+	local force_ipv4="$(getval "$prefix"_CONTEXT_FORCE_IPV4)"
+
+	local config="$ip6"
+	local routes="${gw6:+"default via $gw6"}"
+	local dns_servers="$(getval "$prefix"_DNS)"
+
+	if [ -n "$ip4" ] || [ -z "$ip6" ] || [ -n "$ip6" -a -n "$force_ipv4" ]; then
+		local mask4="$(getval "$prefix"_MASK "$DEFAULT_MASK")"
+		local gw4="$(getval "$prefix"_GATEWAY)"
+
+		if [ -z "$ip4" ]; then
+			ip4="$(gen_ip_from_mac $(getval "$prefix"_MAC))"
+		fi
+		if [ -z "$gw4" ] && [ "$prefix" = 'ETH0' ]; then
+			gw4="$(gen_gateway_from_ipv4 "$ip4")"
+		fi
+		if [ -n "$gw4" ]; then
+			routes="default via $gw4 $routes"
+		fi
+		config="$ip4 netmask $mask4 $config"
+	fi
+
+	echo "config_$dev=\"$config\""
+	[ -n "$routes" ] && echo "routes_$dev=\"$routes\""
+	[ -n "$dns_servers" ] && echo "dns_servers_$dev=\"$dns_servers\""
+}
+
+# Generates and prints netifrc configuration variables for all the
+# contextualized network interfaces.
+gen_network_conf() {
+	local dev mac prefix
+
+	for dev in $(ls /sys/class/net); do
+		mac="$(cat /sys/class/net/$dev/address)"
+		prefix="$(context_dev_by_mac "$mac")"
+
+		if [ -n "$prefix" ]; then
+			gen_iface_conf "$dev" "$prefix"
+			echo ''
+		fi
+	done
+}
+
+
+#-------------------------------- Main -------------------------------
+
+if [ -z "${NETWORK:-}" ]; then
+	exit 0
+fi
+
+. "$(dirname "$0")"/utils.sh
+
+config="$(gen_network_conf)"
+managed_devs=$(printf "$config" | sed -En 's/^config_([^=]+)=.*/\1/p')
+
+update_config '/etc/conf.d/net' "$(readlink -f $0)" "$config"
+
+for dev in $managed_devs; do
+	ln -sf /etc/init.d/net.lo "/etc/init.d/net.$dev"
+	/etc/init.d/$dev restart || true
+done

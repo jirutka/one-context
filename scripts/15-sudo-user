@@ -1,0 +1,29 @@
+#!/bin/sh
+# vim: set ts=4:
+set -eu
+
+readonly ADMIN_GROUP='wheel'
+
+if [ -z "${USERNAME:-}" ]; then
+	exit 0
+fi
+
+if ! hash sudo 2>/dev/null; then
+	echo "WARNING: sudo is not installed, user $USERNAME will not be created" 1>&2
+	exit 0
+fi
+
+if ! id "$USERNAME" 1>/dev/null; then
+	echo "Creating user $USERNAME" 1>&2
+	useradd --create-home \
+		--no-user-group \
+		--groups $ADMIN_GROUP \
+		"$USERNAME"
+elif id -Gn "$USERNAME" | grep -Fq; then
+	usermod --append --groups $ADMIN_GROUP "$USERNAME"
+fi
+
+if [ ! -f /etc/sudoers.d/$ADMIN_GROUP ]; then
+	echo "%$ADMIN_GROUP ALL=(ALL) NOPASSWD: ALL" \
+		| ( EDITOR='tee -a' visudo -f /etc/sudoers.d/$ADMIN_GROUP )
+fi

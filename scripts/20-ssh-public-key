@@ -1,0 +1,26 @@
+#!/bin/sh
+# vim: set ts=4:
+set -eu
+
+if [ -z "${SSH_PUBLIC_KEY:-}" ]; then
+	exit 0
+fi
+
+if ! id "${USERNAME:-}" 1>/dev/null; then
+	USERNAME='root'
+fi
+
+user_home=$(getent passwd "$USERNAME" | cut -d: -f6)
+auth_file="${user_home:-/root}/.ssh/authorized_keys"
+
+install -m0700 -o "$USERNAME" -d "$(dirname auth_file)"
+
+touch "$auth_file"
+chmod 0600 "$auth_file"
+chown "$USERNAME" "$auth_file"
+
+echo "$SSH_PUBLIC_KEY" | while read -r pubkey; do
+	if ! grep -Fq "$pubkey" $auth_file; then
+		echo "$pubkey" >> "$auth_file"
+	fi
+done
