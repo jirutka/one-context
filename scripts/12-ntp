@@ -1,0 +1,20 @@
+#!/bin/sh
+# vim: set ts=4:
+set -eu
+
+# /etc/ntpd.conf: OpenNTPD, /etc/ntp.conf: ISC ntp
+readonly CONF_FILES='/etc/ntpd.conf /etc/ntp.conf'
+
+if [ -z "${NTP_SERVERS:-}" ]; then
+	exit 0
+fi
+
+. "$(dirname "$0")"/utils.sh
+
+ntp_conf=$(echo "$NTP_SERVERS" \
+	| tr -s ' \t' '\n\n' \
+	| xargs -I% printf 'server %\n')
+
+for file in $CONF_FILES; do
+	update_config $file "$(readlink -f "$0")" "$ntp_conf"
+done
