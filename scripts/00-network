@@ -111,5 +111,5 @@ update_config '/etc/conf.d/net' "$(readlink -f $0)" "$config"
 
 for dev in $managed_devs; do
 	ln -sf /etc/init.d/net.lo "/etc/init.d/net.$dev"
-	/etc/init.d/$dev restart || true
+	/etc/init.d/net.$dev restart || true
 done

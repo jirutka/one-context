@@ -13,7 +13,7 @@ fi
 user_home=$(getent passwd "$USERNAME" | cut -d: -f6)
 auth_file="${user_home:-/root}/.ssh/authorized_keys"
 
-install -m0700 -o "$USERNAME" -d "$(dirname auth_file)"
+install -m0700 -o "$USERNAME" -d "$(dirname "$auth_file")"
 
 touch "$auth_file"
 chmod 0600 "$auth_file"
