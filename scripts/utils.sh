@@ -19,7 +19,6 @@ update_config() {
 		cat <<-EOF
 			$start_tag by $generated_by
 			# Do not modify this block, any modifications will be lost after reboot!
-
 			$content
 			$end_tag
 		EOF
