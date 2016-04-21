@@ -16,5 +16,5 @@ ntp_conf=$(echo "$NTP" \
 	| xargs -I% printf 'server %\n')
 
 for file in $CONF_FILES; do
-	update_config $file "$(readlink -f "$0")" "$ntp_conf"
+	[ -e "$file" ] && update_config "$file" "$(readlink -f "$0")" "$ntp_conf"
 done
