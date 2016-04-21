@@ -5,13 +5,13 @@ set -eu
 # /etc/ntpd.conf: OpenNTPD, /etc/ntp.conf: ISC ntp
 readonly CONF_FILES='/etc/ntpd.conf /etc/ntp.conf'
 
-if [ -z "${NTP_SERVERS:-}" ]; then
+if [ -z "${NTP:-}" ]; then
 	exit 0
 fi
 
 . "$(dirname "$0")"/utils.sh
 
-ntp_conf=$(echo "$NTP_SERVERS" \
+ntp_conf=$(echo "$NTP" \
 	| tr -s ' \t' '\n\n' \
 	| xargs -I% printf 'server %\n')
 
