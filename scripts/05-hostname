@@ -4,5 +4,5 @@ set -eu
 
 if [ -n "${SET_HOSTNAME:-}" ]; then
 	echo "hostname=$SET_HOSTNAME" > /etc/conf.d/hostname
-	hostname -s "$SET_HOSTNAME"
+	hostname "$SET_HOSTNAME"
 fi
