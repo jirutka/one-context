@@ -6,7 +6,7 @@ if [ -z "${SSH_PUBLIC_KEY:-}" ]; then
 	exit 0
 fi
 
-if ! id "${USERNAME:-}" 1>/dev/null; then
+if ! id "${USERNAME:-}" 1>&2 2>/dev/null; then
 	USERNAME='root'
 fi
 
