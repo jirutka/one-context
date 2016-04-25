@@ -13,13 +13,13 @@ if ! hash sudo 2>/dev/null; then
 	exit 0
 fi
 
-if ! id "$USERNAME" 1>/dev/null; then
+if ! id "$USERNAME" 1>&2 2>/dev/null; then
 	echo "Creating user $USERNAME" 1>&2
 	useradd --create-home \
 		--no-user-group \
 		--groups $ADMIN_GROUP \
 		"$USERNAME"
-elif id -Gn "$USERNAME" | grep -Fq; then
+elif id -Gn "$USERNAME" 2>/dev/null | grep -Fq; then
 	usermod --append --groups $ADMIN_GROUP "$USERNAME"
 fi
 
