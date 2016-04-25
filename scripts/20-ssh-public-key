@@ -10,7 +10,7 @@ if ! id "${USERNAME:-}" 1>&2 2>/dev/null; then
 	USERNAME='root'
 fi
 
-user_home=$(getent passwd "$USERNAME" | cut -d: -f6)
+user_home="$(getent passwd "$USERNAME" | cut -d: -f6)"
 auth_file="${user_home:-/root}/.ssh/authorized_keys"
 
 install -m0700 -o "$USERNAME" -d "$(dirname "$auth_file")"
@@ -20,7 +20,7 @@ chmod 0600 "$auth_file"
 chown "$USERNAME" "$auth_file"
 
 echo "$SSH_PUBLIC_KEY" | while read -r pubkey; do
-	if ! grep -Fq "$pubkey" $auth_file; then
+	if ! grep -Fq "$pubkey" "$auth_file"; then
 		echo "$pubkey" >> "$auth_file"
 	fi
 done
