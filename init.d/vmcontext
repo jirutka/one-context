@@ -10,6 +10,7 @@ description="Run OpenNebula contextualization scripts."
 : ${script_dirs:="/usr/share/one-context/scripts /etc/one-context.d"}
 
 depend() {
+	need localmount
 	before netmount
 	provide net
 }
