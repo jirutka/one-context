@@ -19,7 +19,7 @@ if ! id "$USERNAME" 1>&2 2>/dev/null; then
 		--no-user-group \
 		--groups $ADMIN_GROUP \
 		"$USERNAME"
-elif id -Gn "$USERNAME" 2>/dev/null | grep -Fq; then
+elif id -Gn "$USERNAME" 2>/dev/null | grep -Fq $ADMIN_GROUP; then
 	usermod --append --groups $ADMIN_GROUP "$USERNAME"
 fi
 
