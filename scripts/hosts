@@ -2,7 +2,7 @@
 # vim: set ts=4:
 set -eu
 
-. "$(dirname "$0")"/utils.sh
+. "$(dirname "$(readlink -f "$0")")"/utils.sh
 
 name="$(hostname)"
 update_config '/etc/hosts' "$(readlink -f $0)" <<-EOF

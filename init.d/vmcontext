@@ -7,7 +7,7 @@ description="Run OpenNebula contextualization scripts."
 
 : ${mount_dir:="/mnt/context"}
 : ${device_label:="CONTEXT"}
-: ${script_dirs:="/usr/share/one-context/scripts /etc/one-context.d"}
+: ${scripts_dir:="/etc/one-context.d"}
 : ${execute_provided_scripts:="yes"}
 
 depend() {
@@ -40,18 +40,15 @@ start() {
 	. "$mount_dir"/context.sh
 	set +a  # disable auto-export
 
-	local dir script
-	for dir in $script_dirs; do
-		for script in "$dir"/*; do
-			[ -x "$script" ] && { "$script" || ewarn "Script $script failed"; }
-		done
+	local script; for script in "$scripts_dir"/*; do
+		[ -x "$script" ] && { "$script" || ewarn "Script $script failed"; }
 	done
 
 	if yesno "$execute_provided_scripts"; then
 		local tmpdir="$(mktemp -d)"
 		cd "$mount_dir"
 
-		for script in ${INIT_SCRIPTS:-init.sh}; do
+		local script; for script in ${INIT_SCRIPTS:-init.sh}; do
 			[ -e "$script" ] || continue
 
 			install -m 755 -D "$script" "$tmpdir/$script"

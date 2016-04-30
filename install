@@ -1,20 +1,30 @@
 #!/bin/sh
 set -eu
 
-cd "$(dirname "$0")"
-
 : ${DESTDIR:=}
 : ${PREFIX:="/usr/local"}
 
-SCRIPTS_DIR="${DESTDIR}$PREFIX/share/one-context/scripts"
-CONF_DIR="$DESTDIR/etc/one-context.d"
+SCRIPTS_DIR="$PREFIX/share/one-context/scripts"
+CONF_DIR="/etc/one-context.d"
 
-install -Dv -m 755 init.d/vmcontext "$DESTDIR"/etc/init.d/vmcontext
+# Names of scripts with a numeric prefix to be used in symlinks.
+SCRIPTS="00-network 05-hostname 10-hosts 15-ntp 50-sudo-user
+	55-ssh-public-key 60-grow-fs"
 
-find scripts/ -type f ! -name '*.sh' | while read path; do
-	install -Dv -m 755 $path "$SCRIPTS_DIR"/$(basename $path)
+
+cd "$(dirname "$0")"
+
+find scripts/ -type f ! -name "*.sh" | while read path; do
+	install -Dv -m 755 $path "${DESTDIR}$SCRIPTS_DIR"/$(basename $path)
 done
 
 for path in scripts/*.sh; do
-	install -Dv -m 644 $path "$SCRIPTS_DIR"/$(basename $path)
+	install -Dv -m 644 $path "${DESTDIR}$SCRIPTS_DIR"/$(basename $path)
+done
+
+install -Dv -m 755 init.d/vmcontext "$DESTDIR"/etc/init.d/vmcontext
+install -dv -m 755 "${DESTDIR}$CONF_DIR"
+
+for name in $SCRIPTS; do
+	ln -fsv "$SCRIPTS_DIR"/${name#*-} "${DESTDIR}$CONF_DIR"/$name
 done

@@ -9,7 +9,7 @@ if [ -z "${NTP:-}" ]; then
 	exit 0
 fi
 
-. "$(dirname "$0")"/utils.sh
+. "$(dirname "$(readlink -f "$0")")"/utils.sh
 
 ntp_conf=$(echo "$NTP" \
 	| tr -s ' \t' '\n\n' \

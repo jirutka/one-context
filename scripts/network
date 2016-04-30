@@ -102,7 +102,7 @@ if [ -z "${NETWORK:-}" ]; then
 	exit 0
 fi
 
-. "$(dirname "$0")"/utils.sh
+. "$(dirname "$(readlink -f "$0")")"/utils.sh
 
 config="$(gen_network_conf)"
 managed_devs=$(printf "$config" | sed -En 's/^config_([^=]+)=.*/\1/p')
