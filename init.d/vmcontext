@@ -8,6 +8,7 @@ description="Run OpenNebula contextualization scripts."
 : ${mount_dir:="/mnt/context"}
 : ${device_label:="CONTEXT"}
 : ${script_dirs:="/usr/share/one-context/scripts /etc/one-context.d"}
+: ${execute_provided_scripts:="yes"}
 
 depend() {
 	need localmount
@@ -45,6 +46,22 @@ start() {
 			[ -x "$script" ] && { "$script" || ewarn "Script $script failed"; }
 		done
 	done
+
+	if yesno "$execute_provided_scripts"; then
+		local tmpdir="$(mktemp -d)"
+		cd "$mount_dir"
+
+		for script in ${INIT_SCRIPTS:-init.sh}; do
+			[ -e "$script" ] || continue
+
+			install -m 755 -D "$script" "$tmpdir/$script"
+			"$tmpdir/$script" || ewarn "Script $script failed"
+			rm "$tmpdir/$script"
+		done
+
+		cd -
+		rmdir "$tmpdir" 2>/dev/null
+	fi
 
 	umount "$mount_dir"
 	rmdir "$mount_dir" 2>/dev/null
