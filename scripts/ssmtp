@@ -1,0 +1,17 @@
+#!/bin/sh
+# vim: set ts=4:
+set -eu
+
+readonly SMTP_CONF='/etc/ssmtp/ssmtp.conf'
+
+if [ ! -f "$SMTP_CONF" ]; then
+	exit 0
+fi
+
+if [ -n "${ROOT_EMAIL:-}" ]; then
+	sed -i "s/^root=.*/root=$ROOT_EMAIL/" "$SMTP_CONF"
+fi
+
+if [ -n "${SMTP:-}" ]; then
+	sed -i "s/^mailhub=.*/mailhub=$SMTP/" "$SMTP_CONF"
+fi
