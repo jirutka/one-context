@@ -18,6 +18,7 @@ if ! id "$USERNAME" 2>/dev/null 1>&2; then
 	useradd --create-home \
 		--no-user-group \
 		--groups $ADMIN_GROUP \
+		${USER_UID:+"--uid $USER_UID"} \
 		"$USERNAME"
 elif id -Gn "$USERNAME" 2>/dev/null | grep -Fq $ADMIN_GROUP; then
 	usermod --append --groups $ADMIN_GROUP "$USERNAME"
