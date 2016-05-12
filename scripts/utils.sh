@@ -13,7 +13,7 @@ readonly VERSION='0.3.0'
 update_config() {
 	local conf_file="$1"
 	local generated_by="$2"
-	local content="${3:-"$(cat -)"}"
+	local content="${3-"$(cat -)"}"  # if $3 is *not set*, read from STDIN
 
 	local start_tag='# BEGIN generated'
 	local end_tag='# END generated'
