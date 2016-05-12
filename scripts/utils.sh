@@ -4,8 +4,9 @@
 
 readonly VERSION='0.3.0'
 
-# Update/create generated section with the given content in the specified
-# configuration file.
+# Creates, updates or deletes generated section with the given content in the
+# specified configuration file. If the content is empty string, then the
+# generated section (start/end tags and everything between) is removed.
 #
 # $1: Path of the file to modify.
 # $2: Path of the script that generated the config (just for info).
@@ -18,7 +19,7 @@ update_config() {
 	local start_tag='# BEGIN generated'
 	local end_tag='# END generated'
 
-	content=$(
+	[ -z "$content" ] || content=$(
 		cat <<-EOF
 			$start_tag by $generated_by
 			# Do not modify this block, any modifications will be lost after reboot!
@@ -28,14 +29,20 @@ update_config() {
 	)
 
 	if [ -f "$conf_file" ] && grep -q "^$start_tag" "$conf_file"; then
-		content=${content//$'\n'/\\$'\n'}  # escape \n, busybox sed doesn't like them
 
-		sed -ni "/^$start_tag/ {
-				a\\$content
-				# read and discard next line and repeat until $end_tag or EOF
-				:a; n; /^$end_tag/!ba; n
-			}; p" "$conf_file"
-	else
+		if [ -n "$content" ]; then
+			content=${content//$'\n'/\\$'\n'}  # escape \n, busybox sed doesn't like them
+			sed -ni "/^$start_tag/ {
+					a\\$content
+					# read and discard next line and repeat until $end_tag or EOF
+					:a; n; /^$end_tag/!ba; n
+				}; p" "$conf_file"
+		else
+			# Remove start/end tags and everything between them.
+			sed -i "/^$start_tag/,/^$end_tag/d" "$conf_file"
+		fi
+
+	elif [ -n "$content" ]; then
 		printf "$content" >> "$conf_file"
 	fi
 }
