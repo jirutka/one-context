@@ -56,7 +56,7 @@ start() {
 			rm "$tmpdir/$script"
 		done
 
-		cd -
+		cd - >/dev/null
 		rmdir "$tmpdir" 2>/dev/null
 	fi
 
