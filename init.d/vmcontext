@@ -16,19 +16,18 @@ depend() {
 	provide net
 }
 
-start_pre() {
-	if [ ! -e "$(blkid -l -t LABEL="$device_label" -o device)" ]; then
-		eerror "Device with label $device_label does not exist"
-		return 1
-	fi
-}
-
 start() {
 	ebegin "Starting $name"
 
+	local device="$(blkid -l -t LABEL="$device_label" -o device)"
+	if [ -z "$device" ]; then
+		eerror "Device with label $device_label does not exist"
+		return 1
+	fi
+
 	if ! mountpoint -q "$mount_dir"; then
 		mkdir -p "$mount_dir"
-		mount -t iso9660 -L "$device_label" -o ro "$mount_dir" || return 1
+		mount -t iso9660 -o ro "$device" "$mount_dir" || return 1
 	fi
 
 	if [ ! -e "$mount_dir"/context.sh ]; then
