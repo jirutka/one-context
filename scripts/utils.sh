@@ -46,3 +46,15 @@ update_config() {
 		printf "$content" >> "$conf_file"
 	fi
 }
+
+# Prints value of the specified variable, or the given default if the variable
+# is empty or not defined.
+#
+# $1: Name of the variable to print.
+# $2: Default value.
+getval() {
+	local var_name="$1"
+	local default="${2:-}"
+
+	eval "echo \${$var_name:-$default}"
+}
