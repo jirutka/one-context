@@ -1,6 +1,8 @@
 #!/bin/sh
+# vim: set ts=4:
 set -eu
 
+: ${DISTRO:=}
 : ${DESTDIR:=}
 : ${PREFIX:="/usr/local"}
 
@@ -14,17 +16,36 @@ SCRIPTS="00-network 05-hostname 10-hosts 15-ntp 50-sudo-user
 
 cd "$(dirname "$0")"
 
-find scripts/ -type f ! -name "*.sh" | while read path; do
+if [ -z "$DISTRO" ] && [ -r /etc/os-release ]; then
+	DISTRO="$(. /etc/os-release; echo $ID)"
+fi
+
+if [ -z "$DISTRO" ]; then
+	echo "Failed to detect distribution, you must set variable DISTRO" 1>&2
+fi
+
+case "$DISTRO" in
+	alpine | gentoo) ;;
+	*) echo "DISTRO must be alpine or gentoo, but given: $DISTRO" 1>&2; exit 1;;
+esac
+
+# Install common scripts.
+find scripts -type f ! -name "*.*" | while read path; do
 	install -Dv -m 755 $path "${DESTDIR}$SCRIPTS_DIR"/$(basename $path)
 done
 
-for path in scripts/*.sh; do
-	install -Dv -m 644 $path "${DESTDIR}$SCRIPTS_DIR"/$(basename $path)
+# Install distro-specific scripts.
+for path in scripts/*.$DISTRO; do
+	install -Dv -m 755 $path "${DESTDIR}$SCRIPTS_DIR"/$(basename ${path%.*})
 done
 
-install -Dv -m 755 init.d/vmcontext "$DESTDIR"/etc/init.d/vmcontext
-install -dv -m 755 "${DESTDIR}$CONF_DIR"
+install -Dv -m 644 scripts/utils.sh "${DESTDIR}$SCRIPTS_DIR"/utils.sh
 
+# Install runscript.
+install -Dv -m 755 init.d/vmcontext "$DESTDIR"/etc/init.d/vmcontext
+
+# Create symlinks from $SCRIPTS_DIR into $CONF_DIR.
+install -dv -m 755 "${DESTDIR}$CONF_DIR"
 for name in $SCRIPTS; do
 	ln -fsv "$SCRIPTS_DIR"/${name#*-} "${DESTDIR}$CONF_DIR"/$name
 done
