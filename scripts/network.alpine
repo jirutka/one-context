@@ -1,0 +1,117 @@
+#!/bin/sh
+# vim: set ts=4:
+#
+# Note: This script should work also on Debian, they uses the same
+# configuration format as Alpine.
+set -eu
+
+readonly DEFAULT_MASK='255.255.255.0'
+
+# Prints address (a.b.c.1) of the default gateway for the given IPv4 address.
+# This is used for ETH0 interface when ETH0_GATEWAY is not provided.
+gen_gateway_from_ipv4() {
+	local ip="$1"
+
+	echo "$(echo $ip | cut -d. -f1-3).1"
+}
+
+# Prints name of the context managed interface for the given MAC address.
+# The name is in upper case and used as a prefix for variables that defines
+# this interface. Returns empty string if doesn't exist.
+context_dev_by_mac() {
+	local mac="$1"
+
+	env | sed -En "s/^(ETH[0-9]+)_MAC=$mac/\1/p"
+}
+
+# Filters values by the regexp, i.e. prints values that matches the regexp.
+#
+# $1: Grep regexp.
+# $@: Values to be filtered.
+filter() {
+	local regexp="$1"; shift
+
+	printf '%s\n' "$@" | grep "$regexp" | xargs
+}
+
+
+# Generates and prints configuration for the specified network interface.
+#
+# $1: Device name of the interface (e.g. eth0, eth1).
+# $2: Context name of the interface, i.e. variable prefix (e.g. ETH0, ETH1).
+gen_iface_conf() {
+	local dev="$1"
+	local prefix="$2"
+
+	local ip4="$(getval "$prefix"_IP)"
+	local ip6="$(getval "$prefix"_IPV6)"
+	local gw6="$(getval "$prefix"_GATEWAY6)"
+	local dns_servers="$(getval "$prefix"_DNS)"
+
+	echo "auto $dev"
+
+	if [ -n "$ip4" ]; then
+		local netmask4="$(getval "$prefix"_MASK "$DEFAULT_MASK")"
+		local dns4="$(filter '.*\..*' $dns_servers)"
+
+		local gw4="$(getval "$prefix"_GATEWAY)"
+		if [ -z "$gw4" ] && [ "$prefix" = 'ETH0' ]; then
+			gw4="$(gen_gateway_from_ipv4 "$ip4")"
+		fi
+
+		cat <<-EOF
+			iface $dev inet static
+			    address $ip4
+			    netmask $netmask4
+			    gateway $gw4
+		EOF
+		[ -z "$dns4" ] || echo "    dns-nameservers $dns4"
+	fi
+
+	if [ -n "$ip6" ] && [ -n "$gw6" ]; then
+		local dns6="$(filter '.*:.*' $dns_servers)"
+
+		[ -z "$ip4" ] || printf '\n'
+		cat <<-EOF
+			iface $dev inet6 static
+			    address ${ip6%/*}
+			    netmask ${ip6#*/}
+			    gateway $gw6
+			    pre-up echo 0 > /proc/sys/net/ipv6/conf/$dev/accept_ra
+		EOF
+		[ -z "$dns6" ] || echo "    dns-nameservers $dns6"
+	fi
+
+	if [ -z "${ip4}${ip6}${gw6}" ]; then
+		echo "iface $dev inet dhcp"  # fallback to DHCP
+	fi
+}
+
+# Generates and prints configuration for all the contextualized
+# network interfaces.
+gen_network_conf() {
+	local dev mac prefix
+
+	for dev in $(ls /sys/class/net); do
+		mac="$(cat /sys/class/net/$dev/address)"
+		prefix="$(context_dev_by_mac "$mac")"
+
+		if [ -n "$prefix" ]; then
+			gen_iface_conf "$dev" "$prefix"
+			echo ''
+		fi
+	done
+}
+
+
+#-------------------------------- Main -------------------------------
+
+if [ -z "${NETWORK:-}" ]; then
+	exit 0
+fi
+
+. "$(dirname "$(readlink -f "$0")")"/utils.sh
+
+update_config '/etc/network/interfaces' "$(readlink -f $0)" "$(gen_network_conf)"
+
+/etc/init.d/networking restart
