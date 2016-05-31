@@ -35,10 +35,7 @@ if [ -n "${GROWFS_DISABLE:-}" ]; then
 	exit 0
 fi
 
-mount | cut -d' ' -f1,5 | sort | uniq | while read -r line; do
-	dev_path="${line% *}"
-	fs_type="${line##* }"
-
+mount | cut -d' ' -f1,5 | sort | uniq | while read dev_path fs_type; do
 	case "$fs_type" in
 		# Note: ext2 can't be resized online.
 		ext3 | ext4)
