@@ -15,13 +15,23 @@ fi
 
 if ! id "$USERNAME" 2>/dev/null 1>&2; then
 	echo "Creating user $USERNAME" 1>&2
-	useradd --create-home \
-		--no-user-group \
-		--groups $ADMIN_GROUP \
-		${USER_UID:+"--uid $USER_UID"} \
-		"$USERNAME"
-elif id -Gn "$USERNAME" 2>/dev/null | grep -Fq $ADMIN_GROUP; then
-	usermod --append --groups $ADMIN_GROUP "$USERNAME"
+
+	if hash useradd 2>/dev/null; then
+		useradd --create-home --no-user-group ${USER_UID:+"-u $USER_UID"} "$USERNAME"
+	else
+		adduser -D -s /bin/sh -G users ${USER_UID:+"-u $USER_UID"} "$USERNAME"
+		passwd -u "$USERNAME" 1>/dev/null  # unlock account
+	fi
+fi
+
+if ! id -Gn "$USERNAME" 2>/dev/null | grep -Fq $ADMIN_GROUP; then
+	echo "Adding user $USERNAME to group $ADMIN_GROUP" 1>&2
+
+	if hash usermod 2>/dev/null; then
+		usermod --append --groups $ADMIN_GROUP "$USERNAME"
+	else
+		addgroup "$USERNAME" $ADMIN_GROUP
+	fi
 fi
 
 if [ ! -f /etc/sudoers.d/$ADMIN_GROUP ]; then
