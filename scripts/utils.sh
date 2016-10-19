@@ -56,5 +56,5 @@ getval() {
 	local var_name="$1"
 	local default="${2:-}"
 
-	eval "echo \${$var_name:-$default}"
+	eval "printf '%s\n' \${$var_name:-$default}"
 }
