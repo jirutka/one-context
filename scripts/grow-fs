@@ -22,8 +22,11 @@ resize_ext() {
 					| xargs | awk '{ print $1 * $2 / 1024 / 1024 }')"
 	local dev_size="$(dev_size "$dev_path")"
 
-	if [ $fs_size -lt $dev_size ]; then
-		echo "Resizing FS on $dev_path from $fs_size MiB to device size $dev_size MiB" 1>&2
+	if [ -z "$fs_size" ] || [ -z "$dev_size" ]; then
+		echo "WARN: Failed to get size of FS or device $dev_path" >&2
+
+	elif [ $fs_size -lt $dev_size ]; then
+		echo "Resizing FS on $dev_path from $fs_size MiB to device size $dev_size MiB" >&2
 		resize2fs "$dev_path"
 	fi
 }
