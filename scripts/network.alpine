@@ -93,7 +93,7 @@ gen_network_conf() {
 	local dev mac prefix
 
 	for dev in $(ls /sys/class/net); do
-		mac="$(cat /sys/class/net/$dev/address)"
+		mac="$(cat /sys/class/net/$dev/address)" 2>/dev/null || continue
 		prefix="$(context_dev_by_mac "$mac")"
 
 		if [ -n "$prefix" ]; then
