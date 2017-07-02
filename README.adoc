@@ -18,8 +18,7 @@ This is _not_ yet another fork of these poor official scripts.
 
 === Alpine Linux
 
-. Add `edge/community` repository (e.g. http://dl-cdn.alpinelinux.org/alpine/edge/community) to `/etc/apk/repositories`, if you don’t have it yet, and run `apk update`.
-. Install https://pkgs.alpinelinux.org/package/edge/community/x86_64/qemu-init-script[one-context]:
+. Install https://pkgs.alpinelinux.org/package/v3.6/community/x86_64/one-context[one-context] from the Alpine’s community repository:
 +
     apk add one-context
 
