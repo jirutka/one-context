@@ -10,6 +10,8 @@ This is _not_ yet another fork of these poor official scripts.
 
 * POSIX-compatible shell (e.g. ash, bash, dash)
 * https://wiki.gentoo.org/wiki/OpenRC[OpenRC]
+* blkid from https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git[util-linux] (for OpenRC runscript)
+* resize2fs from http://e2fsprogs.sourceforge.net[e2fsprogs] (only for growfs script)
 * https://wiki.gentoo.org/wiki/Netifrc[Netifrc] or `ifup` (only for network scripts)
 * kernel with support for mounting CD-ROM with ISO 9660 filesystem footnote:[This is the way how OpenNebula passes configuration variables into VM.]
 
