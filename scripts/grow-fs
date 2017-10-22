@@ -19,7 +19,7 @@ resize_ext() {
 	# Note: df doesn't count reserved blocks, that's why we use dumpe2fs.
 	local fs_size="$(dumpe2fs -h "$dev_path" 2>/dev/null \
 					| sed -En 's/Block (count|size):\s*([0-9]+)/\2/p' \
-					| xargs | awk '{ print $1 * $2 / 1024 / 1024 }')"
+					| xargs | awk '{ print int($1 * $2 / 1024 / 1024) }')"
 	local dev_size="$(dev_size "$dev_path")"
 
 	if [ -z "$fs_size" ] || [ -z "$dev_size" ]; then
