@@ -63,8 +63,8 @@ gen_iface_conf() {
 			iface $dev inet static
 			    address $ip4
 			    netmask $netmask4
-			    gateway $gw4
 		EOF
+		[ -z "$gw4"  ] || echo "    gateway $gw4"
 		[ -z "$dns4" ] || echo "    dns-nameservers $dns4"
 	fi
 
@@ -76,10 +76,10 @@ gen_iface_conf() {
 			iface $dev inet6 static
 			    address ${ip6%/*}
 			    netmask ${ip6#*/}
-			    gateway $gw6
-			    pre-up echo 0 > /proc/sys/net/ipv6/conf/$dev/accept_ra
 		EOF
+		[ -z "$gw6"  ] || echo "    gateway $gw6"
 		[ -z "$dns6" ] || echo "    dns-nameservers $dns6"
+		echo "    pre-up echo 0 > /proc/sys/net/ipv6/conf/$dev/accept_ra"
 	fi
 
 	if [ -z "${ip4}${ip6}${gw6}" ]; then
