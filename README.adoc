@@ -20,7 +20,7 @@ This is _not_ yet another fork of these poor official scripts.
 
 === Alpine Linux
 
-. Install https://pkgs.alpinelinux.org/package/v3.6/community/x86_64/one-context[one-context] from the Alpine’s community repository:
+. Install https://pkgs.alpinelinux.org/package/v3.8/main/x86_64/one-context[one-context] from the Alpine’s main repository:
 +
     apk add one-context
 
