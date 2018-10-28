@@ -2,7 +2,7 @@
 # Utility functions for one-context scripts.
 # https://github.com/jirutka/one-context
 
-readonly VERSION='0.5.4'
+readonly VERSION='0.5.5'
 
 # Creates, updates or deletes generated section with the given content in the
 # specified configuration file. If the content is empty string, then the
