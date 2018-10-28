@@ -3,6 +3,7 @@
 set -eu
 
 if [ -n "${SET_HOSTNAME:-}" ]; then
-	echo "hostname=$SET_HOSTNAME" > /etc/conf.d/hostname
+	printf 'hostname=%s\n' "$SET_HOSTNAME" > /etc/conf.d/hostname
+	printf '%s\n' "$SET_HOSTNAME" > /etc/hostname
 	hostname "$SET_HOSTNAME"
 fi
