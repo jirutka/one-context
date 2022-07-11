@@ -8,7 +8,7 @@ if [ -z "${USERNAME:-}" ]; then
 	exit 0
 fi
 
-if ! hash sudo 2>/dev/null; then
+if ! command -v sudo >/dev/null; then
 	echo "WARNING: sudo is not installed, user $USERNAME will not be created" 1>&2
 	exit 0
 fi
@@ -16,7 +16,7 @@ fi
 if ! id "$USERNAME" 2>/dev/null 1>&2; then
 	echo "Creating user $USERNAME" 1>&2
 
-	if hash useradd 2>/dev/null; then
+	if command -v useradd >/dev/null; then
 		useradd --create-home --no-user-group ${USER_UID:+"-u $USER_UID"} "$USERNAME"
 	else
 		adduser -D -s /bin/sh -G users ${USER_UID:+"-u $USER_UID"} "$USERNAME"
@@ -27,7 +27,7 @@ fi
 if ! id -Gn "$USERNAME" 2>/dev/null | grep -Fq $ADMIN_GROUP; then
 	echo "Adding user $USERNAME to group $ADMIN_GROUP" 1>&2
 
-	if hash usermod 2>/dev/null; then
+	if command -v usermod >/dev/null; then
 		usermod --append --groups $ADMIN_GROUP "$USERNAME"
 	else
 		addgroup "$USERNAME" $ADMIN_GROUP
