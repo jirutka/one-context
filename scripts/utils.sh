@@ -4,6 +4,11 @@
 
 readonly VERSION='0.5.5'
 
+# Enable pipefail if supported by the shell.
+if ( set -o pipefail 2>/dev/null ); then
+	set -o pipefail
+fi
+
 # Creates, updates or deletes generated section with the given content in the
 # specified configuration file. If the content is empty string, then the
 # generated section (start/end tags and everything between) is removed.
