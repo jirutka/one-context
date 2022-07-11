@@ -4,8 +4,18 @@ set -eu
 
 . "$(dirname "$(readlink -f "$0")")"/utils.sh
 
-name="$(hostname)"
-update_config '/etc/hosts' "$(readlink -f $0)" <<-EOF
-	127.0.0.1	${name}.local ${name} localhost
-	::1		${name}.local ${name} localhost
+hostname="$(hostname -s)"
+
+# NOTE: SET_FQDN is a custom variable, it's not supported by the official
+# addon-context-linux.
+fqdn="$(printf '%s\n' "${SET_FQDN:-${SET_HOSTNAME:-}}" \
+       | sed 's/[^-a-zA-Z0-9\.]/-/g; s/^[.-]*//g; s/[.-]*$//g')"
+case "$fqdn" in
+	*.*) ;;
+	*) fqdn="$hostname.local";;
+esac
+
+update_config '/etc/hosts' "$(readlink -f "$0")" <<-EOF
+	127.0.0.1	${fqdn} ${hostname} localhost
+	::1		${fqdn} ${hostname} localhost
 EOF
