@@ -37,7 +37,7 @@ gen_iface_conf() {
 	local routes=''
 	local config=''
 
-	if [ -n "$ip4" ]; then
+	if [ "$ip4" ]; then
 		config="$ip4 netmask $(getval "$prefix"_MASK "$DEFAULT_MASK")"
 
 		local gw4="$(getval "$prefix"_GATEWAY)"
@@ -47,7 +47,7 @@ gen_iface_conf() {
 		routes="default via $gw4"
 	fi
 
-	if [ -n "$ip6" ] && [ -n "$gw6" ]; then
+	if [ "$ip6" ] && [ "$gw6" ]; then
 		config="$config $ip6"
 		routes="$routes default via $gw6"
 	fi
@@ -68,7 +68,7 @@ gen_network_conf() {
 		mac="$(cat /sys/class/net/$dev/address)" 2>/dev/null || continue
 		prefix="$(context_dev_by_mac "$mac")"
 
-		if [ -n "$prefix" ]; then
+		if [ "$prefix" ]; then
 			gen_iface_conf "$dev" "$prefix"
 			echo ''
 		fi

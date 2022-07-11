@@ -30,7 +30,7 @@ update_config() {
 
 	if [ -f "$conf_file" ] && grep -q "^$start_tag" "$conf_file"; then
 
-		if [ -n "$content" ]; then
+		if [ "$content" ]; then
 			content=${content//$'\n'/\\$'\n'}  # escape \n, busybox sed doesn't like them
 			sed -ni "/^$start_tag/ {
 					a\\$content
@@ -42,7 +42,7 @@ update_config() {
 			sed -i "/^$start_tag/,/^$end_tag/d" "$conf_file"
 		fi
 
-	elif [ -n "$content" ]; then
+	elif [ "$content" ]; then
 		printf '%s\n' "$content" >> "$conf_file"
 	fi
 }

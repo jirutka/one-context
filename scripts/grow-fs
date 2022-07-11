@@ -34,7 +34,7 @@ resize_ext() {
 
 #-------------------------------- Main -------------------------------
 
-if [ -n "${GROWFS_DISABLE:-}" ]; then
+if [ "${GROWFS_DISABLE:-}" ]; then
 	exit 0
 fi
 

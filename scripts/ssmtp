@@ -8,10 +8,10 @@ if [ ! -f "$SSMTP_CONF" ]; then
 	exit 0
 fi
 
-if [ -n "${ROOT_EMAIL:-}" ]; then
+if [ "${ROOT_EMAIL:-}" ]; then
 	sed -i "s/^[# ]*Root=.*/Root=$ROOT_EMAIL/i" "$SSMTP_CONF"
 fi
 
-if [ -n "${SMTP:-}" ]; then
+if [ "${SMTP:-}" ]; then
 	sed -i "s/^[# ]*Mailhub=.*/Mailhub=$SMTP/i" "$SSMTP_CONF"
 fi
