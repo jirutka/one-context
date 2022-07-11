@@ -21,12 +21,12 @@ if [ -z "$DISTRO" ] && [ -r /etc/os-release ]; then
 fi
 
 if [ -z "$DISTRO" ]; then
-	echo "Failed to detect distribution, you must set variable DISTRO" 1>&2
+	echo "Failed to detect distribution, you must set variable DISTRO" >&2
 fi
 
 case "$DISTRO" in
 	alpine | gentoo) ;;
-	*) echo "DISTRO must be alpine or gentoo, but given: $DISTRO" 1>&2; exit 1;;
+	*) echo "DISTRO must be alpine or gentoo, but given: $DISTRO" >&2; exit 1;;
 esac
 
 # Install common scripts.
