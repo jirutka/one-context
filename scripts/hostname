@@ -3,6 +3,8 @@
 set -eu
 
 if [ -n "${SET_HOSTNAME:-}" ]; then
-	printf '%s\n' "$SET_HOSTNAME" > /etc/hostname
-	hostname "$SET_HOSTNAME"
+	printf '%s\n' "${SET_HOSTNAME%%.*}" \
+		| sed 's/[^-a-zA-Z0-9]/-/g; s/^-*//g; s/-*$//g' \
+		> /etc/hostname
+	hostname "$(cat /etc/hostname)"
 fi
