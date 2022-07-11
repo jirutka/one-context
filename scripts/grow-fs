@@ -5,7 +5,7 @@
 # because it's just silly to use partitions on non-physical disks.
 set -eu
 
-# Prints size of the specified device in megabytes.
+# Prints size (in megabytes) of the specified device.
 dev_size() {
 	local dev_path="$1"
 
@@ -13,38 +13,58 @@ dev_size() {
 	expr $bytes / 1024 / 1024
 }
 
-resize_ext() {
-	local dev_path="$1"
+# Prints size (in megabytes) of the specified filesystem.
+fs_size() {
+	local fs_type="$1"
+	local dev_path="$2"
 
-	# Note: df doesn't count reserved blocks, that's why we use dumpe2fs.
-	local fs_size="$(dumpe2fs -h "$dev_path" 2>/dev/null \
-					| sed -En 's/Block (count|size):\s*([0-9]+)/\2/p' \
-					| xargs | awk '{ print int($1 * $2 / 1024 / 1024) }')"
-	local dev_size="$(dev_size "$dev_path")"
-
-	if [ -z "$fs_size" ] || [ -z "$dev_size" ]; then
-		echo "WARN: Failed to get size of FS or device $dev_path" >&2
-
-	elif [ $fs_size -lt $dev_size ]; then
-		echo "Resizing FS on $dev_path from $fs_size MiB to device size $dev_size MiB" >&2
-		resize2fs "$dev_path"
-	fi
+	case "$fs_type" in
+		btrfs)
+			btrfs filesystem show --mbytes "$dev_path" \
+				| sed -En "s|.* size ([0-9]+).*path $dev_path$|\1|p"
+		;;
+		ext*)
+			# Note: df doesn't count reserved blocks, that's why we use dumpe2fs.
+			dumpe2fs -h "$dev_path" 2>/dev/null \
+				| sed -En 's/Block (count|size):\s*([0-9]+)/\2/p' \
+				| xargs \
+				| awk '{ print int($1 * $2 / 1024 / 1024) }'
+		;;
+		*) return 1;;
+	esac
 }
 
-resize_btrfs() {
+# Prints the first mount point of the specified device.
+fs_mountpoint() {
 	local dev_path="$1"
 
-	local fs_size="$(btrfs filesystem show --mbytes "$dev_path" \
-	                | sed -En "s|.* size ([0-9]+).*path $dev_path$|\1|p")"
+	mount | grep "^$dev_path " | cut -d' ' -f3 | head -n1
+}
+
+fs_resize() {
+	local fs_type="$1"
+	local dev_path="$2"
+
+	case "$fs_type" in
+		btrfs) btrfs filesystem resize max "$(fs_mountpoint "$dev_path")";;
+		ext*) resize2fs "$dev_path";;
+		*) return 1;;
+	esac
+}
+
+fs_resize_if_needed() {
+	local fs_type="$1"
+	local dev_path="$2"
+
+	local fs_size="$(fs_size "$fs_type" "$dev_path")"
 	local dev_size="$(dev_size "$dev_path")"
 
 	if [ -z "$fs_size" ] || [ -z "$dev_size" ]; then
-		echo "WARN: Failed to get size of FS or device $dev_path" >&2
+		echo "WARN: Failed to get size of $fs_type FS or device on $dev_path" >&2
 
 	elif [ $fs_size -lt $dev_size ]; then
-		echo "Resizing FS on $dev_path from $fs_size MiB to device size $dev_size MiB" >&2
-		local mount_dir="$(mount -t btrfs | grep "^$dev_path " | cut -d' ' -f3 | head -n1)"
-		btrfs filesystem resize max "$mount_dir"
+		echo "Resizing $fs_type on $dev_path from $fs_size MiB to device size $dev_size MiB" >&2
+		fs_resize "$fs_type" "$dev_path"
 	fi
 }
 
@@ -60,11 +80,6 @@ fi
 mount | cut -d' ' -f1,5 | sort | uniq | while read dev_path fs_type; do
 	case "$fs_type" in
 		# Note: ext2 can't be resized online.
-		ext3 | ext4)
-			resize_ext "$dev_path"
-		;;
-		btrfs)
-			resize_btrfs "$dev_path"
-		;;
+		ext3 | ext4 | btrfs) fs_resize_if_needed "$fs_type" "$dev_path";;
 	esac
 done
