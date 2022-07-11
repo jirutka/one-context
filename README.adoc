@@ -1,4 +1,6 @@
 = OpenNebula Contextualization / OpenRC
+:proj-name: one-context
+:gh-name: jirutka/{proj-name}
 
 This project provides “contextualization” scripts for https://alpinelinux.org[Alpine Linux] and https://gentoo.org[Gentoo] virtual machines running on http://opennebula.org[OpenNebula].
 
@@ -20,21 +22,25 @@ This is _not_ yet another fork of these poor official scripts.
 
 === Alpine Linux
 
-. Install https://pkgs.alpinelinux.org/packages?name=one-context[one-context] from the Alpine’s main repository:
+. Install https://pkgs.alpinelinux.org/packages?name={proj-name}[{proj-name}] from the Alpine’s main repository:
 +
-    apk add one-context
+[source, sh, subs="+attributes"]
+apk add {proj-name}
 
 
 === Manually
 
 . Clone this repository and jump in:
 +
-    git clone https://github.com/jirutka/one-context.git
-    cd one-context
 
-. Install runscript, contextualization scripts and symlinks (you may need to run this with sudo)…
+[source, sh, subs="+attributes"]
+git clone https://github.com/{gh-name}.git
+cd one-context
+
+. Install init script, contextualization scripts and symlinks (you may need to run this with sudo)…
 +
-    ./install
+[source, sh]
+./install
 +
 You may use variables `DESTDIR` and `PREFIX` to specify the target directories.
 
