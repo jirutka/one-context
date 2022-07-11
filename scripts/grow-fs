@@ -31,6 +31,23 @@ resize_ext() {
 	fi
 }
 
+resize_btrfs() {
+	local dev_path="$1"
+
+	local fs_size="$(btrfs filesystem show --mbytes "$dev_path" \
+	                | sed -En "s|.* size ([0-9]+).*path $dev_path$|\1|p")"
+	local dev_size="$(dev_size "$dev_path")"
+
+	if [ -z "$fs_size" ] || [ -z "$dev_size" ]; then
+		echo "WARN: Failed to get size of FS or device $dev_path" >&2
+
+	elif [ $fs_size -lt $dev_size ]; then
+		echo "Resizing FS on $dev_path from $fs_size MiB to device size $dev_size MiB" >&2
+		local mount_dir="$(mount -t btrfs | grep "^$dev_path " | cut -d' ' -f3 | head -n1)"
+		btrfs filesystem resize max "$mount_dir"
+	fi
+}
+
 
 #-------------------------------- Main -------------------------------
 
@@ -45,6 +62,9 @@ mount | cut -d' ' -f1,5 | sort | uniq | while read dev_path fs_type; do
 		# Note: ext2 can't be resized online.
 		ext3 | ext4)
 			resize_ext "$dev_path"
+		;;
+		btrfs)
+			resize_btrfs "$dev_path"
 		;;
 	esac
 done
