@@ -58,3 +58,13 @@ getval() {
 
 	eval "printf '%s\n' \${$var_name:-$default}"
 }
+
+# Returns 0 if the given value is "YES" (case insensitive), 1 otherwise.
+#
+# $1: The value to test.
+yesno() {
+	case "$1" in
+		[yY][eE][sS]) return 0;;
+		*) return 1;;
+	esac
+}

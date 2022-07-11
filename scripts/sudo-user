@@ -8,10 +8,7 @@ if [ -z "${USERNAME:-}" ]; then
 	exit 0
 fi
 
-if ! command -v sudo >/dev/null; then
-	echo "WARNING: sudo is not installed, user $USERNAME will not be created" 1>&2
-	exit 0
-fi
+. "$(dirname "$(readlink -f "$0")")"/utils.sh
 
 if ! id "$USERNAME" >/dev/null 2>&1; then
 	echo "Creating user $USERNAME" >&2
@@ -34,7 +31,14 @@ if ! id -Gn "$USERNAME" 2>/dev/null | grep -Fq $ADMIN_GROUP; then
 	fi
 fi
 
-if [ ! -f /etc/sudoers.d/$ADMIN_GROUP ]; then
-	echo "%$ADMIN_GROUP ALL=(ALL) NOPASSWD: ALL" \
-		| ( EDITOR='tee -a' visudo -f /etc/sudoers.d/$ADMIN_GROUP )
+if yesno "${USERNAME_SUDO:-YES}"; then
+	if ! command -v sudo >/dev/null; then
+		echo 'WARNING: sudo is not installed' >&2
+		exit 0
+	fi
+
+	if [ ! -f /etc/sudoers.d/$ADMIN_GROUP ]; then
+		echo "%$ADMIN_GROUP ALL=(ALL) NOPASSWD: ALL" \
+			| ( EDITOR='tee -a' visudo -f /etc/sudoers.d/$ADMIN_GROUP )
+	fi
 fi
