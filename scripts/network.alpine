@@ -106,11 +106,11 @@ gen_network_conf() {
 
 #-------------------------------- Main -------------------------------
 
-if [ -z "${NETWORK:-}" ]; then
+. "$(dirname "$(readlink -f "$0")")/utils.sh"
+
+if ! yesno "${NETWORK:-}"; then
 	exit 0
 fi
-
-. "$(dirname "$(readlink -f "$0")")"/utils.sh
 
 update_config '/etc/network/interfaces' "$(readlink -f $0)" "$(gen_network_conf)"
 

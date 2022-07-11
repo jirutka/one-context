@@ -78,11 +78,11 @@ gen_network_conf() {
 
 #-------------------------------- Main -------------------------------
 
-if [ -z "${NETWORK:-}" ]; then
+. "$(dirname "$(readlink -f "$0")")/utils.sh"
+
+if ! yesno "${NETWORK:-}"; then
 	exit 0
 fi
-
-. "$(dirname "$(readlink -f "$0")")"/utils.sh
 
 config="$(gen_network_conf)"
 managed_devs=$(printf "$config" | sed -En 's/^config_([^=]+)=.*/\1/p')

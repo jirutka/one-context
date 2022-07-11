@@ -34,7 +34,9 @@ resize_ext() {
 
 #-------------------------------- Main -------------------------------
 
-if [ "${GROWFS_DISABLE:-}" ]; then
+. "$(dirname "$(readlink -f "$0")")/utils.sh"
+
+if yesno "${GROWFS_DISABLE:-}"; then
 	exit 0
 fi
 
