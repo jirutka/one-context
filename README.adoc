@@ -40,7 +40,7 @@ cd one-context
 . Install init script, contextualization scripts and symlinks (you may need to run this with sudo)…
 +
 [source, sh]
-./install
+make install
 +
 You may use variables `DESTDIR` and `PREFIX` to specify the target directories.
 
