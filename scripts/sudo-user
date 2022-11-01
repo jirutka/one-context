@@ -4,6 +4,8 @@ set -eu
 
 readonly ADMIN_GROUP='wheel'
 
+: ${USER_SHELL:=${USERNAME_SHELL:-"/bin/sh"}}
+
 if [ -z "${USERNAME:-}" ]; then
 	exit 0
 fi
@@ -14,10 +16,14 @@ if ! id "$USERNAME" >/dev/null 2>&1; then
 	echo "Creating user $USERNAME" >&2
 
 	if command -v useradd >/dev/null; then
-		useradd --create-home --no-user-group ${USER_UID:+"-u $USER_UID"} "$USERNAME"
+		useradd --create-home \
+		        --no-user-group \
+		        --shell "$USER_SHELL" \
+		        ${USER_UID:+"-u $USER_UID"} \
+		        "$USERNAME"
 	else
-		adduser -D -s /bin/sh -G users ${USER_UID:+"-u $USER_UID"} "$USERNAME"
-		passwd -u "$USERNAME" 1>/dev/null  # unlock account
+		adduser -D -G users -s "$USER_SHELL" ${USER_UID:+"-u $USER_UID"} "$USERNAME"
+		passwd -u "$USERNAME" >/dev/null  # unlock account
 	fi
 fi
 
