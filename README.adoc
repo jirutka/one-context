@@ -8,6 +8,76 @@ The scripts are inspired by the official scripts from https://github.com/OpenNeb
 This is _not_ yet another fork of these poor official scripts.
 
 
+== Scripts
+
+=== link:scripts/network[00-network]
+
+Configures network interfaces (via `/etc/network/interfaces` on Alpine or `/etc/conf.d/net` on Gentoo) and (re)starts the networking service, if `**$NETWORK**` is `YES`.
+It supports the following variables:
+
+* `**$ETH<n>_MAC**` -- Used to find the correct interface by MAC address.
+* `**$ETH<n>_IP**` -- IPv4 address for the interface.
+* `**$ETH<n>_IP6**` (or legacy `**$ETH<n>_IPV6**`) -- IPv6 address for the interface.
+* `**$ETH<n>_MASK**` -- IPv4 network mask for the interface.
+* `**$ETH<n>_GATEWAY**` -- Default IPv4 gateway for the interface.
+* `**$ETH<n>_GATEWAY6**` -- Default IPv6 gateway for the interface.
+* `**$ETH<n>_DNS**` -- DNS for the network.
+
+
+=== link:scripts/hostname[05-hostname]
+
+Sets the hostname to `**$SET_HOSTNAME**`, if provided.
+It should contain only alphanumeric ASCII characters and a hyphen (`[a-zA-Z0-9-]`), all other characters will be replaced with a hyphen (`-`).
+
+
+=== link:scripts/hosts[10-hosts]
+
+Adds the following lines to `/etc/hosts`:
+
+[source, subs="+quotes"]
+127.0.0.1  _<fqdn>_ _<hostname>_ localhost
+::1        _<fqdn>_ _<hostname>_ localhost
+
+`__<fqdn>__` is `**$SET_FQDN**` or, if not provided, `**$SET_HOSTNAME**`.
+It should contain only alphanumeric characters, a hyphen and a period (`[a-zA-Z0-9.-]`), all other characters will be replaced with a hyphen (`-`).
+
+`__<hostname>__` is the system’s hostname (previously set to `**$SET_HOSTNAME**`).
+
+
+=== link:scripts/ntp[15-ntp]
+
+Adds NTP servers specified in `**$NTP**` (as space-seperated addressess) to either `/etc/ntpd.conf` (OpenNTPD) or `/etc/ntp.conf` (ISC ntp), if `**$NTP**` is provided.
+
+
+=== link:scripts/sudo-user[50-sudo-user]
+
+Creates an user account named `**$USERNAME**` with primary group `users`, secondary group `wheel`, and shell `**$USERNAME_SHELL**` (defaults to `/bin/sh`).
+If `**$USERNAME_SUDO**` isn’t provided or it’s `YES`, it also creates a `doas` or `sudo` (if `doas` is not installed) rule in `/etc/doas.d/wheel.conf` or `/etc/sudoers.d/wheel`, respectively, to permit the created user to run any command as any user (i.e. gives them the root access).
+
+If `**$USERNAME**` is not provided, this script is skipped.
+
+
+=== link:scripts/ssh-public-key[55-ssh-public-key]
+
+Adds an SSH public key provided in `**$SSH_PUBLIC_KEY**` to `authorized_keys` of the user specified by `**$USERNAME**` (or `root` if not set), if `**$SSH_PUBLIC_KEY**` is provided.
+
+
+=== link:scripts/grow-fs[60-grow-fs]
+
+Extends all mounted filesystems to the maximum disk capacity, unless `**$GROWFS_DISABLE**` is `YES`.
+Only ext3, ext4, and btrfs are currently supported.
+
+*Note*: This script does not increase size of underlying partitions, because it’s just silly to use partitions on non-physical disks.
+
+
+=== link:scripts/ssmtp[65-ssmtp]
+
+Updates `/etc/ssmtp/ssmtp.conf`, if exists:
+
+* `Root` to `**$ROOT_EMAIL**` (if provided)
+* `Mailhub` to `**$SMTP**` (if provided)
+
+
 == Requirements
 
 * POSIX-compatible shell (e.g. ash, bash, dash)
