@@ -1,4 +1,4 @@
-# vim: set ts=4:
+# vim: set ts=4 sw=4:
 # Utility functions for one-context scripts.
 # https://github.com/jirutka/one-context
 

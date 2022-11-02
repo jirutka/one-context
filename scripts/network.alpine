@@ -1,5 +1,5 @@
 #!/bin/sh
-# vim: set ts=4:
+# vim: set ts=4 sw=4:
 #
 # Note: This script should work also on Debian, they uses the same
 # configuration format as Alpine.
