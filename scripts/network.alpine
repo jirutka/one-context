@@ -44,7 +44,7 @@ gen_iface_conf() {
 	local prefix="$2"
 
 	local ip4="$(getval "$prefix"_IP)"
-	local ip6="$(getval "$prefix"_IPV6)"
+	local ip6="$(getval "$prefix"_IP6 "$(getval "$prefix"_IPV6)")"  # _IPV6 is deprecated
 	local gw6="$(getval "$prefix"_GATEWAY6)"
 	local dns_servers="$(getval "$prefix"_DNS)"
 
