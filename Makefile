@@ -16,7 +16,7 @@ SED          := sed
 MAKEFILE_PATH = $(lastword $(MAKEFILE_LIST))
 
 # Names of scripts with a numeric prefix to be used in symlinks.
-SCRIPTS      := 00-network 05-hostname 10-hosts 15-ntp 50-sudo-user 55-ssh-public-key 60-grow-fs 65-ssmtp
+SCRIPTS      := 00-network 05-hostname 10-hosts 15-ntp 20-timezone 50-sudo-user 55-ssh-public-key 60-grow-fs 65-ssmtp
 
 #: Print list of targets.
 help:

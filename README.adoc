@@ -49,6 +49,11 @@ It should contain only alphanumeric characters, a hyphen and a period (`[a-zA-Z0
 Adds NTP servers specified in `**$NTP**` (as space-seperated addressess) to either `/etc/ntpd.conf` (OpenNTPD) or `/etc/ntp.conf` (ISC ntp), if `**$NTP**` is provided.
 
 
+=== link:scripts/timezone[20-timezone]
+
+Changes the system timezone to `**$TIMEZONE**` (e.g. `Europe/Prague`, `UTC`), if provided.
+
+
 === link:scripts/sudo-user[50-sudo-user]
 
 Creates an user account named `**$USERNAME**` with primary group `users`, secondary group `wheel`, and shell `**$USERNAME_SHELL**` (defaults to `/bin/sh`).
