@@ -2,7 +2,7 @@
 # Utility functions for one-context scripts.
 # https://github.com/jirutka/one-context
 
-readonly VERSION='0.6.2'
+readonly VERSION='0.7.0'
 
 # Enable pipefail if supported by the shell.
 if ( set -o pipefail 2>/dev/null ); then
