@@ -2,7 +2,7 @@
 :proj-name: one-context
 :gh-name: jirutka/{proj-name}
 
-This project provides “contextualization” scripts for https://alpinelinux.org[Alpine Linux] and https://gentoo.org[Gentoo] virtual machines running on http://opennebula.org[OpenNebula].
+This project provides “contextualization” scripts for https://alpinelinux.org[Alpine Linux] and https://gentoo.org[Gentoo] (with OpenRC) virtual machines running on http://opennebula.org[OpenNebula].
 
 The scripts are inspired by the official scripts from https://github.com/OpenNebula/addon-context-linux[addon-context-linux], but rewritten from scratch to be more readable, robust and fully POSIX compatible.
 This is _not_ yet another fork of these poor official scripts.
