@@ -6,7 +6,6 @@ sysconfdir   := /etc
 CONF_DIR     := $(sysconfdir)/one-context.d
 INITD_DIR    := $(sysconfdir)/init.d
 SCRIPTS_DIR  := $(datadir)/one-context/scripts
-DISTRO       := $(shell test -r /etc/os-release && . /etc/os-release && echo $$ID)
 
 GIT          := git
 INSTALL      := install
@@ -25,7 +24,7 @@ help:
 		| while read label desc; do printf '%-17s %s\n' "$$label" "$$desc"; done
 
 #: Check shell scripts for syntax errors.
-check: .check-distro
+check:
 	@rc=0; for f in scripts/*; do \
 		if $(SHELL) -n $$f; then \
 			printf "%-33s PASS\n" $$f; \
@@ -39,13 +38,11 @@ check: .check-distro
 install: install-scripts install-symlinks install-init
 
 #: Install contextualization scripts to ${DESTDIR}${SCRIPTS_DIR}/.
-install-scripts: .check-distro
+install-scripts:
 	@$(INSTALL) -Dv -m 644 scripts/utils.sh $(DESTDIR)$(SCRIPTS_DIR)/utils.sh
 	@for name in $(SCRIPTS); do \
 		name=$${name#*-}; \
-		src=scripts/$$name.$(DISTRO); \
-		test -e $$src || src=scripts/$$name; \
-		$(INSTALL) -Dv -m 755 $$src $(DESTDIR)$(SCRIPTS_DIR)/$$name; \
+		$(INSTALL) -Dv -m 755 scripts/$$name $(DESTDIR)$(SCRIPTS_DIR)/$$name; \
 	done
 
 #: Install symlinks to contextualization scripts to ${DESTDIR}${CONF_DIR}/.
@@ -73,10 +70,6 @@ release: .check-git-clean | bump-version
 
 .PHONY: help check install install-scripts install-symlinks install-init bump-version release
 
-
-.check-distro:
-	$(if $(DISTRO),,$(error Failed to detect distribution, you must set variable DISTRO))
-	$(if $(filter alpine gentoo,$(DISTRO)),,$(error DISTRO must be alpine or gentoo, but given: $(DISTRO)))
 
 .check-git-clean:
 	@test -z "$(shell $(GIT) status --porcelain)" \

@@ -2,17 +2,19 @@
 :proj-name: one-context
 :gh-name: jirutka/{proj-name}
 
-This project provides “contextualization” scripts for https://alpinelinux.org[Alpine Linux] and https://gentoo.org[Gentoo] (with OpenRC) virtual machines running on http://opennebula.org[OpenNebula].
+This project provides “contextualization” scripts for https://alpinelinux.org[Alpine Linux] virtual machines running on http://opennebula.org[OpenNebula].
 
 The scripts are inspired by the official scripts from https://github.com/OpenNebula/addon-context-linux[addon-context-linux], but rewritten from scratch to be more readable, robust and fully POSIX compatible.
 This is _not_ yet another fork of these poor official scripts.
+
+*NOTE:* Support for Gentoo has been removed in version 0.8.0. If you miss it, please let me know in the issues.
 
 
 == Scripts
 
 === link:scripts/network[00-network]
 
-Configures network interfaces (via `/etc/network/interfaces` on Alpine or `/etc/conf.d/net` on Gentoo) and (re)starts the networking service, if `**$NETWORK**` is `YES`.
+Configures network interfaces (via `/etc/network/interfaces`) and (re)starts the networking service, if `**$NETWORK**` is `YES`.
 It supports the following variables:
 
 * `**$ETH<n>_MAC**` -- Used to find the correct interface by MAC address.
@@ -89,7 +91,7 @@ Updates `/etc/ssmtp/ssmtp.conf`, if exists:
 * https://wiki.gentoo.org/wiki/OpenRC[OpenRC]
 * blkid from https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git[util-linux] (for OpenRC runscript)
 * btrfs utility and/or resize2fs from http://e2fsprogs.sourceforge.net[e2fsprogs] (only for growfs script)
-* https://wiki.gentoo.org/wiki/Netifrc[Netifrc] or `ifup` (only for network scripts)
+* `ifup` (only for network scripts)
 * kernel with support for mounting CD-ROM with ISO 9660 filesystem footnote:[This is the way how OpenNebula passes configuration variables into VM.]
 
 
