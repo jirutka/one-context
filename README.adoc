@@ -74,7 +74,9 @@ Adds an SSH public key provided in `**$SSH_PUBLIC_KEY**` to `authorized_keys` of
 Extends all mounted filesystems to the maximum disk capacity, unless `**$GROWFS_DISABLE**` is `YES`.
 Only ext3, ext4, and btrfs are currently supported.
 
-*Note*: This script does not increase size of underlying partitions, because it’s just silly to use partitions on non-physical disks.
+If the filesystem resides on a partition (GPT or DOS) and it’s the last partition, it will be expanded before resizing the filesystem.
+
+*Note*: It’s completely unnecessary and pointless to use partitions on virtual disks, it just adds more complexity and complications, but some broken platforms and tools require it.
 
 
 === link:scripts/ssmtp[65-ssmtp]
@@ -88,9 +90,11 @@ Updates `/etc/ssmtp/ssmtp.conf`, if exists:
 == Requirements
 
 * POSIX-compatible shell (e.g. ash, bash, dash)
+* core *nix utils (`awk`, `grep`, `sed`...)
 * https://wiki.gentoo.org/wiki/OpenRC[OpenRC]
 * blkid from https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git[util-linux] (for OpenRC runscript)
 * btrfs utility and/or resize2fs from http://e2fsprogs.sourceforge.net[e2fsprogs] (only for growfs script)
+* `partx` and `sfdisk` from https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git[util-linux] (only for grow-fs script if you use partitions)
 * `ifup` (only for network scripts)
 * kernel with support for mounting CD-ROM with ISO 9660 filesystem footnote:[This is the way how OpenNebula passes configuration variables into VM.]
 

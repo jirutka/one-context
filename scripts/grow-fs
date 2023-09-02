@@ -1,20 +1,78 @@
 #!/bin/sh
 # vim: set ts=4 sw=4:
-#
-# Note: This script does not increase size of underlying partitions,
-# because it's just silly to use partitions on non-physical disks.
 set -eu
 
 # Prints size (in megabytes) of the specified device.
-dev_size() {
+dev_size_mb() {
 	local dev_path="$1"
 
 	local bytes="$(blockdev --getsize64 "$dev_path")"
 	expr $bytes / 1024 / 1024
 }
 
+is_partition() {
+	local dev_path="$1"
+	test -e "/sys/class/block/${dev_path##*/}/partition"
+}
+
+is_last_partition() {
+	local part_path="$1"
+	local disk_path="$2"
+
+	local part_uuid="$(partx -sg -o UUID "$part_path" "$disk_path")"
+	local last_uuid="$(partx -sg -o UUID "$disk_path" | tail -n 1)"
+
+	[ "$part_uuid" = "$last_uuid" ]
+}
+
+part_resize() {
+	local disk_path="$1"
+	local partno="$2"
+
+	# Note: sfdisk prints "Resource busy" error if --no-tell-kernel is not used
+	#  and we must use 'partx --update' anyway.
+	echo ', +' | sfdisk --no-reread --no-tell-kernel --color=never --partno "$partno" "$disk_path"
+
+	# Tell kernel that the partition table has been modified.
+	partx --update "$disk_path"
+}
+
+part_resize_if_needed() {
+	local part_path="$1"
+
+	local part_name="${dev_path##*/}"
+	local disk_path="$(readlink -f /sys/class/block/$part_name/..)"
+	disk_path="/dev/${disk_path##*/}"
+
+	# sfdisk supports only DOS and GPT partitions.
+	local scheme="$(partx -sg -o SCHEME "$part_path" "$disk_path")"
+	case "$scheme" in
+		dos | gpt) ;;  # continue
+		*) echo "WARN: Found unsupported partition table on $disk_path: $scheme" >&2; return 0;;
+	esac
+
+	# Only the last partition can be expanded.
+	if ! is_last_partition "$part_path" "$disk_path"; then
+		return 0
+	fi
+
+	local partno="$(cat /sys/class/block/$part_name/partition)"
+	# Size of the block device in sectors.
+	local disk_size="$(blockdev --getsz "$disk_path")"
+	# The end of the last partition in sectors.
+	local last_part_end="$(partx -sg --sector-size 512 -o END "$part_path")"
+
+	# Ignore difference that is less than ~4 MiB.
+	if [ "$(( $disk_size - $last_part_end ))" -lt 8192 ]; then
+		return 0
+	fi
+
+	echo "Resizing partition no. $partno on disk $disk_path" >&2
+	part_resize "$disk_path" "$partno"
+}
+
 # Prints size (in megabytes) of the specified filesystem.
-fs_size() {
+fs_size_mb() {
 	local fs_type="$1"
 	local dev_path="$2"
 
@@ -56,8 +114,8 @@ fs_resize_if_needed() {
 	local fs_type="$1"
 	local dev_path="$2"
 
-	local fs_size="$(fs_size "$fs_type" "$dev_path")"
-	local dev_size="$(dev_size "$dev_path")"
+	local fs_size="$(fs_size_mb "$fs_type" "$dev_path")"
+	local dev_size="$(dev_size_mb "$dev_path")"
 
 	if [ -z "$fs_size" ] || [ -z "$dev_size" ]; then
 		echo "WARN: Failed to get size of $fs_type FS or device on $dev_path" >&2
@@ -80,6 +138,9 @@ fi
 mount | cut -d' ' -f1,5 | sort | uniq | while read dev_path fs_type; do
 	case "$fs_type" in
 		# Note: ext2 can't be resized online.
-		ext3 | ext4 | btrfs) fs_resize_if_needed "$fs_type" "$dev_path";;
+		ext3 | ext4 | btrfs)
+			is_partition "$dev_path" && part_resize_if_needed "$dev_path"
+			fs_resize_if_needed "$fs_type" "$dev_path"
+		;;
 	esac
 done
