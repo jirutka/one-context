@@ -23,7 +23,7 @@ It supports the following variables:
 * `**$ETH<n>_MASK**` -- IPv4 network mask for the interface.
 * `**$ETH<n>_GATEWAY**` -- Default IPv4 gateway for the interface.
 * `**$ETH<n>_GATEWAY6**` -- Default IPv6 gateway for the interface.
-* `**$ETH<n>_DNS**` -- DNS for the network.
+* `**$ETH<n>_DNS**` -- DNS servers for the network (as space-separated addressess).
 
 
 === link:scripts/hostname[05-hostname]
