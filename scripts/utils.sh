@@ -48,7 +48,7 @@ update_config() {
 		fi
 
 	elif [ "$content" ]; then
-		printf '%s\n' "$content" >> "$conf_file"
+		printf '\n%s\n' "$content" >> "$conf_file"
 	fi
 }
 
