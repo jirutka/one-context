@@ -15,7 +15,7 @@ case "$fqdn" in
 	*) fqdn="$hostname.local";;
 esac
 
-update_config '/etc/hosts' "$(readlink -f "$0")" <<-EOF
+update_config '/etc/hosts' <<-EOF
 	127.0.0.1	${fqdn} ${hostname} localhost
 	::1		${fqdn} ${hostname} localhost
 EOF

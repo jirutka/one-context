@@ -17,6 +17,6 @@ ntp_conf=$(echo "$NTP" \
 
 for file in $CONF_FILES; do
 	if [ -e "$file" ]; then
-		update_config "$file" "$(readlink -f "$0")" "$ntp_conf"
+		update_config "$file" "$ntp_conf"
 	fi
 done
