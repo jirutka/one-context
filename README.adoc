@@ -24,6 +24,7 @@ It supports the following variables:
 * `**$ETH<n>_GATEWAY**` -- Default IPv4 gateway for the interface.
 * `**$ETH<n>_GATEWAY6**` -- Default IPv6 gateway for the interface.
 * `**$ETH<n>_DNS**` -- DNS servers for the network (as space-separated addressess).
+* `**$ETH<n>_SEARCH_DOMAIN**` -- The domain search list for the network.
 
 
 === link:scripts/hostname[05-hostname]

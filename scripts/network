@@ -97,10 +97,17 @@ gen_network_conf() {
 	done
 }
 
-# Generates and prints resolv.conf with DNS collected from all contextualized
-# network interfaces.
+# Generates and prints resolv.conf with DNS and SEARCH_DOMAIN collected from
+# all contextualized network interfaces.
 gen_resolv_conf() {
-	local item; for item in $(getvals 'ETH[0-9]+_DNS'); do
+	local item search=''
+
+	for item in $(getvals 'ETH[0-9]+_SEARCH_DOMAIN'); do
+		search="$search $item"
+	done
+	[ -z "$search" ] || echo "search $search"
+
+	for item in $(getvals 'ETH[0-9]+_DNS'); do
 		echo "nameserver $item"
 	done
 }
