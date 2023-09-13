@@ -102,12 +102,12 @@ gen_network_conf() {
 gen_resolv_conf() {
 	local item search=''
 
-	for item in $(getvals 'ETH[0-9]+_SEARCH_DOMAIN'); do
+	for item in ${SEARCH_DOMAIN:-} $(getvals 'ETH[0-9]+_SEARCH_DOMAIN'); do
 		search="$search $item"
 	done
 	[ -z "$search" ] || echo "search $search"
 
-	for item in $(getvals 'ETH[0-9]+_DNS'); do
+	for item in ${DNS:-} $(getvals 'ETH[0-9]+_DNS'); do
 		echo "nameserver $item"
 	done
 }

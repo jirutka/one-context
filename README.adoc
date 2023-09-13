@@ -17,6 +17,8 @@ This is _not_ yet another fork of these poor official scripts.
 Configures network interfaces (via `/etc/network/interfaces`) and (re)starts the networking service, if `**$NETWORK**` is `YES`.
 It supports the following variables:
 
+* `**$DNS**` -- DNS servers (as space-separated addressess).
+* `**$SEARCH_DOMAIN**` -- The domain search list.
 * `**$ETH<n>_MAC**` -- Used to find the correct interface by MAC address.
 * `**$ETH<n>_IP**` -- IPv4 address for the interface.
 * `**$ETH<n>_IP6**` (or legacy `**$ETH<n>_IPV6**`) -- IPv6 address for the interface.
