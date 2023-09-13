@@ -39,6 +39,8 @@ start() {
 	. "$mount_dir"/context.sh
 	set +a  # disable auto-export
 
+	export MOUNT_DIR="$mount_dir"
+
 	local script; for script in "$scripts_dir"/*; do
 		[ -x "$script" ] && { "$script" || ewarn "Script $script failed"; }
 	done

@@ -1,0 +1,24 @@
+#!/bin/sh
+# vim: set ts=4 sw=4:
+set -eu
+
+[ "${START_SCRIPT_BASE64:-}" ] || [ "${START_SCRIPT:-}" ] || exit 0
+
+tmpfile="$(mktemp)"
+trap "rm -f '$tmpfile'" EXIT HUP INT TERM
+
+if [ "${START_SCRIPT_BASE64:-}" ]; then
+	printf '%s\n' "$START_SCRIPT_BASE64" | base64 -d > "$tmpfile"
+elif [ "${START_SCRIPT:-}" ]; then
+	printf '%s\n' "$START_SCRIPT" > "$tmpfile"
+fi
+
+cd "$MOUNT_DIR"
+
+echo 'Executing start script' >&2
+if head -n1 "$tmpfile" | grep -q '^#!\s*\w\+'; then
+	chmod +x "$tmpfile"
+	"$tmpfile"
+else
+	/bin/sh "$tmpfile"
+fi

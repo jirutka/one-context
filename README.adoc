@@ -87,6 +87,12 @@ Updates `/etc/ssmtp/ssmtp.conf`, if exists:
 * `Mailhub` to `**$SMTP**` (if provided)
 
 
+=== link:scripts/start-script[90-start-script]
+
+Executes the script provided in `**$START_SCRIPT_BASE64**` (base64-encoded) or `**$START_SCRIPT**`.
+If the script doesn’t start with a shebang, it’s executed with /bin/sh.
+
+
 == Requirements
 
 * POSIX-compatible shell (e.g. ash, bash, dash)
