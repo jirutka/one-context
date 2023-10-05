@@ -21,10 +21,10 @@ It supports the following variables:
 * `**$SEARCH_DOMAIN**` -- The domain search list.
 * `**$ETH<n>_MAC**` -- Used to find the correct interface by MAC address.
 * `**$ETH<n>_IP**` -- IPv4 address for the interface.
-* `**$ETH<n>_IP6**` (or legacy `**$ETH<n>_IPV6**`) -- IPv6 address for the interface.
 * `**$ETH<n>_MASK**` -- IPv4 network mask for the interface.
 * `**$ETH<n>_GATEWAY**` -- Default IPv4 gateway for the interface.
-* `**$ETH<n>_GATEWAY6**` -- Default IPv6 gateway for the interface.
+* `**$ETH<n>_IP6**` (or legacy `**$ETH<n>_IPV6**`) -- IPv6 address for the interface.
+* `**$ETH<n>_IP6_GATEWAY**` (or legacy `**$ETH<n>_GATEWAY6**`) -- Default IPv6 gateway for the interface.
 * `**$ETH<n>_DNS**` -- DNS servers for the network (as space-separated addressess).
 * `**$ETH<n>_SEARCH_DOMAIN**` -- The domain search list for the network.
 
